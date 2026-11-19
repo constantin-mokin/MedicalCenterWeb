@@ -1,0 +1,26 @@
+@model MedicalCenterWeb.Models.AuditLogListViewModel
+@{
+    ViewData["Title"] = "Журнал действий";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="card">
+    <div class="card-title">Журнал действий (всего: @Model.Total)</div>
+    <div class="search-bar no-print">
+        <form method="get" style="display:flex;gap:10px;flex:1"><input type="text" name="search" class="form-control" placeholder="Поиск по пользователю, действию..." value="@Model.Search" /><button type="submit" class="btn btn-outline">Найти</button></form>
+        <form asp-action="CleanOld" method="post" onsubmit="return confirm('Удалить записи журнала старше 90 дней?')"><button type="submit" class="btn btn-outline">Очистить старше 90 дней</button></form>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Дата/Время</th><th>Пользователь</th><th>Действие</th><th>Детали</th></tr></thead><tbody>
+    @foreach (var l in Model.Logs)
+    {
+        <tr><td>@l.Timestamp.ToString("dd.MM.yyyy HH:mm:ss")</td><td class="fw-600">@l.Username</td><td>@l.Action</td><td>@l.Details</td></tr>
+    }
+    @if (Model.Logs.Count == 0)
+    {
+        <tr><td colspan="4" class="text-center text-muted">Записей нет</td></tr>
+    }
+    </tbody></table></div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination">@{for (var i = 1; i <= Model.TotalPages; i++){ if (i == Model.CurrentPage){<span class="active">@i</span>}else{<a href="?page=@i&search=@Model.Search">@i</a>} }}</div>
+    }
+</div>

@@ -1,0 +1,18 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Ошибка";
+}
+<div class="card" style="max-width:640px;margin:40px auto">
+    <div class="card-title">Произошла ошибка</div>
+    <p>При обработке запроса возникла непредвиденная ситуация. Работа системы не нарушена —
+        можно вернуться на предыдущую страницу и повторить действие.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p class="text-muted">Идентификатор запроса: <code>@Model.RequestId</code></p>
+        <p class="text-muted">Сообщите этот идентификатор администратору, если ошибка повторяется.</p>
+    }
+    <div class="btn-group mt-4">
+        <a href="javascript:history.back()" class="btn btn-outline">Назад</a>
+        <a href="/" class="btn btn-primary">На главную</a>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+@model MedicalCenterWeb.Models.StatsIndexViewModel
+@{
+    ViewData["Title"] = "Отчёты и статистика";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="stat-row">
+    <div class="stat-item"><div class="val">@Model.TotalDoctors</div><div class="lbl">Врачей</div></div>
+    <div class="stat-item"><div class="val">@Model.TotalPatients</div><div class="lbl">Пациентов</div></div>
+    <div class="stat-item"><div class="val">@Model.TotalAppointments</div><div class="lbl">Всего приёмов</div></div>
+    <div class="stat-item"><div class="val">@Model.CompletedAppointments</div><div class="lbl">Выполнено</div></div>
+    <div class="stat-item"><div class="val">@Model.ScheduledAppointments</div><div class="lbl">Запланировано</div></div>
+    <div class="stat-item"><div class="val">@Model.CancelledAppointments</div><div class="lbl">Отменено</div></div>
+    <div class="stat-item"><div class="val">@Model.TotalRevenue.ToString("N2") BYN</div><div class="lbl">Выручка</div></div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-title">Приёмы по периодам</div>
+        <div class="filter-row no-print">
+            <button class="btn btn-sm btn-outline" onclick="loadChart('week')">Неделя</button>
+            <button class="btn btn-sm btn-outline" onclick="loadChart('month')">Месяц</button>
+            <button class="btn btn-sm btn-outline" onclick="loadChart('year')">Год</button>
+        </div>
+        <div class="bar-chart" id="chartArea">
+            <p class="text-muted text-center" style="align-self:center">Загрузка...</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">Топ врачей</div>
+        <div class="table-wrap"><table><thead><tr><th>Врач</th><th>Специализация</th><th>Приёмов</th></tr></thead><tbody>
+        @foreach (var d in Model.TopDoctors)
+        {
+            <tr><td class="fw-600">@d.DoctorName</td><td>@d.Specialization</td><td>@d.Count</td></tr>
+        }
+        </tbody></table></div>
+    </div>
+</div>
+<div class="card mt-4">
+    <div class="card-title">Популярные процедуры</div>
+    <div class="table-wrap"><table><thead><tr><th>Процедура</th><th>Количество</th></tr></thead><tbody>
+    @foreach (var p in Model.PopularProcedures)
+    {
+        <tr><td class="fw-600">@p.ProcedureName</td><td>@p.Count</td></tr>
+    }
+    </tbody></table></div>
+</div>
+@section Scripts{
+<script>
+function loadChart(period){
+    fetch('/Stats/GetChartData?period='+period).then(r=>r.json()).then(data=>{
+        if(!data.length){document.getElementById('chartArea').innerHTML='<p class="text-muted text-center" style="align-self:center">Нет данных</p>';return}
+        data = data.map(function(x){return {
+            date: x.date !== undefined ? x.date : x.Date,
+            count: x.count !== undefined ? x.count : x.Count
+        };});
+        var max=Math.max.apply(null, data.map(function(d){return d.count;}).concat([1]));
+        var html='';
+        data.forEach(function(d){var h=Math.round((d.count/max)*100);html+='<div class="bar-group"><div class="bar" style="height:'+h+'%"><div class="bar-value">'+d.count+'</div></div><div class="bar-label">'+d.date+'</div></div>';});
+        document.getElementById('chartArea').innerHTML=html;
+    });
+}
+loadChart('week');
+</script>
+}

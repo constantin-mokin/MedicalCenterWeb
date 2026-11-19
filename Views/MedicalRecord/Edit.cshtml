@@ -1,0 +1,27 @@
+@model MedicalCenterWeb.Models.MedicalRecordEditViewModel
+@{
+    ViewData["Title"] = "Медицинская карта";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="card" id="printArea">
+    <div class="card-title">Медицинская карта</div>
+    <div class="print-only" style="text-align:center;margin-bottom:20px;font-size:1.2rem;font-weight:700">Медицинский центр «Искра», г. Минск</div>
+    <p class="mb-4">
+        <strong>Приём:</strong> @(Model.Appointment.Patient?.FirstName) @(Model.Appointment.Patient?.LastName) — @Model.Appointment.AppointmentDateTime.ToString("dd.MM.yyyy HH:mm")<br/>
+        <strong>Врач:</strong> @(Model.Appointment.Doctor?.User?.FirstName) @(Model.Appointment.Doctor?.User?.LastName) — @Model.Appointment.Doctor?.Specialization<br/>
+        <strong>Процедура:</strong> @Model.Appointment.Procedure?.Name
+    </p>
+    <form asp-action="Save" method="post">
+        <input type="hidden" name="appointmentId" value="@Model.Appointment.Id" />
+        <div class="form-group"><label>Диагноз</label><textarea name="diagnosis" class="form-control" rows="2">@(Model.Record?.Diagnosis)</textarea></div>
+        <div class="form-group"><label>Хронические заболевания</label><textarea name="chronicDiseases" class="form-control" rows="2">@(Model.Record?.ChronicDiseases)</textarea></div>
+        <div class="form-group"><label>Рекомендации</label><textarea name="recommendations" class="form-control" rows="2">@(Model.Record?.Recommendations)</textarea></div>
+        <div class="form-group"><label>Заметки</label><textarea name="notes" class="form-control" rows="2">@(Model.Record?.Notes)</textarea></div>
+        @if (Model.Record != null && Model.Record.UpdatedAt.HasValue)
+        {
+            <p class="text-muted mt-2">Обновлено: @Model.Record.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</p>
+        }
+        <div class="btn-group mt-4 no-print"><button type="submit" class="btn btn-success">Сохранить</button><button type="button" class="btn btn-primary" onclick="printCard()">Распечатать</button><a href="javascript:history.back()" class="btn btn-outline">Назад</a></div>
+    </form>
+</div>
+@section Scripts{<script>function printCard(){window.print()}</script>}

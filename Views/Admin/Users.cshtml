@@ -1,0 +1,29 @@
+@model MedicalCenterWeb.Models.UsersListViewModel
+@using MedicalCenterWeb.Models
+@{
+    ViewData["Title"] = "Пользователи";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="card">
+    <div class="card-title">Учётные записи пользователей</div>
+    <p class="text-muted">Сброс пароля доступен для врачей и регистраторов. Новый пароль генерируется системой и показывается один раз.</p>
+    <div class="table-wrap"><table><thead><tr><th>ФИО</th><th>Логин</th><th>Роль</th><th>Телефон</th><th>Последний вход</th><th>Статус</th><th>Действия</th></tr></thead><tbody>
+    @foreach (var u in Model.Users)
+    {
+        <tr>
+            <td class="fw-600">@u.FullName</td>
+            <td>@u.Username</td>
+            <td>@(u.Role == UserRole.Admin ? "Администратор" : u.Role == UserRole.Doctor ? "Врач" : "Регистратор")</td>
+            <td>@u.Phone</td>
+            <td>@(u.LastLogin.HasValue ? u.LastLogin.Value.ToString("dd.MM.yyyy HH:mm") : "—")</td>
+            <td><span class="status-badge @(u.IsActive ? "status-completed" : "status-cancelled")">@(u.IsActive ? "Активен" : "Отключён")</span></td>
+            <td><div class="btn-group">
+                @if (u.CanReset)
+                {
+                    <form asp-action="ResetPassword" asp-route-id="@u.Id" method="post" onsubmit="return confirm('Сбросить пароль пользователя @u.Username?')"><button type="submit" class="btn btn-sm btn-primary">Сбросить пароль</button></form>
+                }
+            </div></td>
+        </tr>
+    }
+    </tbody></table></div>
+</div>

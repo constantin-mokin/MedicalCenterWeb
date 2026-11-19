@@ -1,0 +1,82 @@
+@model MedicalCenterWeb.Models.AdminDashboardViewModel
+@using MedicalCenterWeb.Models
+@{
+    ViewData["Title"] = "Главная";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="datetime-widget card">
+    <div class="datetime-date">@Model.TodayDate</div>
+    <div class="datetime-time" id="liveClock">--:--:--</div>
+</div>
+
+<div class="dash-grid">
+    <a asp-action="Doctors" class="dash-card" style="text-decoration:none;color:inherit"><div class="number">@Model.DoctorCount</div><div class="label">Врачей</div></a>
+    <a asp-controller="Staff" asp-action="Patients" class="dash-card" style="text-decoration:none;color:inherit"><div class="number">@Model.PatientCount</div><div class="label">Пациентов</div></a>
+    <a asp-controller="Staff" asp-action="Appointments" class="dash-card" style="text-decoration:none;color:inherit"><div class="number">@Model.AppointmentCount</div><div class="label">Активных приёмов</div></a>
+    <a asp-action="Procedures" class="dash-card" style="text-decoration:none;color:inherit"><div class="number">@Model.ProcedureCount</div><div class="label">Процедур</div></a>
+    <a asp-controller="Staff" asp-action="Appointments" class="dash-card" style="text-decoration:none;color:inherit"><div class="number">@Model.MedicalRecordCount</div><div class="label">Медкарт</div></a>
+</div>
+<div class="stat-row">
+    <div class="stat-item"><div class="val">@Model.Revenue.ToString("N2") BYN</div><div class="lbl">Общая выручка</div></div>
+</div>
+
+<div class="card">
+    <div class="card-title">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:var(--primary)"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+        Записи на сегодня
+        <span class="today-count">@Model.TodayAppointments.Count</span>
+    </div>
+    @if (Model.TodayAppointments.Count > 0)
+    {
+        <div class="today-list">
+            @foreach (var a in Model.TodayAppointments)
+            {
+                <div class="today-item">
+                    <div class="today-time">@a.AppointmentDateTime.ToString("HH:mm")</div>
+                    <div class="today-info">
+                        <div class="today-patient">@a.Patient.FirstName @a.Patient.LastName</div>
+                        <div class="today-detail">@(a.Doctor?.User?.FirstName) @(a.Doctor?.User?.LastName) — @a.Procedure?.Name</div>
+                    </div>
+                    <span class="status-badge @a.Status.StatusCss()">@a.Status.StatusText()</span>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">На сегодня записей нет</div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-title">Последние записи</div>
+    <div class="table-wrap"><table><thead><tr><th>Пациент</th><th>Врач</th><th>Процедура</th><th>Дата</th><th>Статус</th><th>Медкарта</th></tr></thead><tbody>
+    @foreach (var a in Model.RecentAppointments)
+    {
+        <tr>
+            <td class="fw-600">@a.Patient.FirstName @a.Patient.LastName</td>
+            <td>@(a.Doctor?.User?.FirstName) @(a.Doctor?.User?.LastName)</td>
+            <td>@a.Procedure?.Name</td>
+            <td>@a.AppointmentDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+            <td><span class="status-badge @a.Status.StatusCss()">@a.Status.StatusText()</span></td>
+            <td><a asp-controller="MedicalRecord" asp-action="Edit" asp-route-appointmentId="@a.Id" class="btn btn-sm btn-outline">Открыть</a></td>
+        </tr>
+    }
+    </tbody></table></div>
+</div>
+
+@section Scripts {
+<script>
+function updateClock(){
+    const now=new Date();
+    const h=String(now.getHours()).padStart(2,'0');
+    const m=String(now.getMinutes()).padStart(2,'0');
+    const s=String(now.getSeconds()).padStart(2,'0');
+    const el=document.getElementById('liveClock');
+    if(el) el.textContent=h+':'+m+':'+s;
+}
+updateClock();
+setInterval(updateClock,1000);
+</script>
+}
